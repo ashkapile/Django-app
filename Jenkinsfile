@@ -3,7 +3,8 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'ashkapile/django-app'
-        CONTAINER_NAME = 'django-app-container'
+        DOCKERHUB_CREDS = 'dockerhub-credentials-id'
+        CONTAINER_NAME = 'django-container'
     }
 
     stages {
@@ -21,6 +22,20 @@ pipeline {
                     sh """
                     docker build -t ${IMAGE_NAME} .
                     """
+                }
+            }
+        }
+
+        stage('Push to Dockerhub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh """
+                        echo "DOCKER_PASS" | docker login -u "DOCKER_USER" --password-stdin
+                        docker push ${IMAGE_NAME}
+                        docker logout
+                        """
+                    }
                 }
             }
         }
