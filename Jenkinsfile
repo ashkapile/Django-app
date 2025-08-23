@@ -1,5 +1,11 @@
 pipeline {
-    agent any
+    //agent any
+    agent {
+        docker {
+            image 'docker:24.0.7'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     environment {
         IMAGE_NAME = 'ashkapile/django-app'
@@ -29,12 +35,12 @@ pipeline {
         stage('Push to Dockerhub') {
             steps {
                 script {
-                    docker.image(${IMAGE_NAME}).inside('-v /var/run/docker.sock:/var/run/docker.sock') {
-                        sh """
-                        docker version
-                        docker build -t ${IMAGE_NAME} .
-                        """
-                    }
+                    // docker.image('docker:24.0.7').inside('-v /var/run/docker.sock:/var/run/docker.sock') {
+                    //     sh """
+                    //     docker version
+                    //     docker build -t ${IMAGE_NAME} .
+                    //     """
+                    // }
                     
                     withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh """
