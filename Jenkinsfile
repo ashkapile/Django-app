@@ -1,11 +1,11 @@
 pipeline {
     //agent any
-    agent {
-        docker {
-            image 'docker:24.0.7'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    // agent {
+    //     docker {
+    //         image 'docker:24.0.7'
+    //         args '-v /var/run/docker.sock:/var/run/docker.sock'
+    //     }
+    // }
 
     environment {
         IMAGE_NAME = 'ashkapile/django-app'
@@ -22,29 +22,29 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    sh """
-                    docker build -t ${IMAGE_NAME} .
-                    """
-                }
-            }
-        }
+        // stage('Build Docker Image') {
+        //     steps {
+        //         script {
+        //             sh """
+        //             docker build -t ${IMAGE_NAME} .
+        //             """
+        //         }
+        //     }
+        // }
 
         stage('Push to Dockerhub') {
             steps {
                 script {
-                    // docker.image('docker:24.0.7').inside('-v /var/run/docker.sock:/var/run/docker.sock') {
-                    //     sh """
-                    //     docker version
-                    //     docker build -t ${IMAGE_NAME} .
-                    //     """
-                    // }
+                    docker.image('docker:24.0.7').inside('-v /var/run/docker.sock:/var/run/docker.sock') {
+                        sh """
+                        docker version
+                        docker build -t ${IMAGE_NAME} .
+                        """
+                    }
                     
                     withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh """
-                        echo "DOCKER_PASS" | docker login -u "DOCKER_USER" --password-stdin
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                         docker push ${IMAGE_NAME}
                         docker logout
                         """
