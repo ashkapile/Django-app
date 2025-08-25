@@ -22,6 +22,12 @@ pipeline {
             }
         }
 
+        stage('Check docker') {
+            steps {
+                sh 'docker version'
+            }
+        }
+
         stage('Push to Dockerhub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
