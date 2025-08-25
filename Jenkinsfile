@@ -1,5 +1,12 @@
 pipeline {
-    agent any
+    //agent any
+
+    agent {
+        docker {
+            image 'docker:24.0.7-dind'
+            args '--privileged' // Important for DinD
+        }
+    }
 
     environment {
         IMAGE_NAME = 'ashkapile/django-app'
@@ -16,15 +23,16 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Check Docker') {
             steps {
-                sh "docker build -t ${IMAGE_NAME} ."
+                sh 'dockerd-entrypoint.sh & sleep 10' // Start Docker daemon
+                sh 'docker version'
             }
         }
 
-        stage('Check docker') {
+        stage('Build Docker Image') {
             steps {
-                sh 'docker version'
+                sh "docker build -t ${IMAGE_NAME} ."
             }
         }
 
